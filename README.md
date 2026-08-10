@@ -79,10 +79,11 @@ provided, but exact GPU results can still vary with hardware and low-level libra
 
 ## AI-assisted coding disclosure
 
-OpenAI ChatGPT and Codex were used to help draft and debug portions of the analysis code
-and to improve documentation. The authors inspected the code, ran the analyses locally,
-and checked the reported outputs against source records and numerical consistency checks.
-No CUBS image, annotation, or participant-level record was uploaded to these services.
+OpenAI GPT-5.6-sol through Codex and Anthropic Claude Opus 4.8 were used to help draft
+and debug portions of the analysis code and to improve documentation. The authors
+inspected the code, ran the analyses locally, and checked the reported outputs against
+source records and numerical consistency checks. No CUBS image, annotation, or
+participant-level record was uploaded to these services.
 
 ## Citation and license
 
