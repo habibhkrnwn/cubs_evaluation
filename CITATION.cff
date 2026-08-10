@@ -15,6 +15,7 @@ authors:
     given-names: Hendra
     email: hendraks@its.ac.id
 license: MIT
+repository-code: "https://github.com/habibhkrnwn/cubs_evaluation"
 keywords:
   - carotid intima-media thickness
   - ultrasound segmentation
