@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the accompanying manuscript and the two CUBS datasets."
+title: "Endpoint-aligned carotid ultrasound segmentation on CUBS"
+type: software
+version: 1.0.0
+date-released: 2026-08-10
+authors:
+  - family-names: Kurniawan
+    given-names: Habib Hammam
+    email: 6022251037@student.its.ac.id
+  - family-names: Sardjono
+    given-names: Tri Arief
+    email: sardjono@bme.its.ac.id
+  - family-names: Kusuma
+    given-names: Hendra
+    email: hendraks@its.ac.id
+license: MIT
+keywords:
+  - carotid intima-media thickness
+  - ultrasound segmentation
+  - measurement-aligned learning
+  - source shift
+  - uncertainty

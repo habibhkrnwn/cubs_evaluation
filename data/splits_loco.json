@@ -1,0 +1,30 @@
+{
+ "Cyprus": {
+  "n_test": 1388,
+  "n_train": 1288
+ },
+ "Munich": {
+  "n_test": 100,
+  "n_train": 2576
+ },
+ "Pisa_clin": {
+  "n_test": 788,
+  "n_train": 1888
+ },
+ "Pisa_tech": {
+  "n_test": 100,
+  "n_train": 2576
+ },
+ "Porto": {
+  "n_test": 100,
+  "n_train": 2576
+ },
+ "Torino": {
+  "n_test": 100,
+  "n_train": 2576
+ },
+ "Toronto": {
+  "n_test": 100,
+  "n_train": 2576
+ }
+}
