@@ -28,6 +28,8 @@ two folders. See [DATA.md](DATA.md) for the expected layout and data-use notes.
 - `notebooks/`: dataset-index construction, measurement-aligned training, baselines,
   and source-withholding experiments.
 - `analysis/`: no-GPU scripts used for statistical and robustness analyses.
+- `ieee_access/`: post hoc exploratory analyses and figure scripts for the IEEE Access
+  version of the manuscript (see `ieee_access/README.md`).
 - `guards/check_release.py`: standalone integrity and portability checks.
 - `NUMBERS.md`: numerical provenance ledger used while preparing the manuscript.
 
@@ -84,6 +86,10 @@ and debug portions of the analysis code and to improve documentation. The author
 inspected the code, ran the analyses locally, and checked the reported outputs against
 source records and numerical consistency checks. No CUBS image, annotation, or
 participant-level record was uploaded to these services.
+
+The post hoc exploratory analyses and figure scripts in `ieee_access/` were written with
+Anthropic Claude (Claude Code) and checked by assertions that reproduce the previously
+reported values before any new estimate is computed.
 
 ## Citation and license
 

@@ -17,3 +17,8 @@ checkpoints/
 
 .DS_Store
 Thumbs.db
+
+# IEEE Access revision: regenerated per-image records, figures and LaTeX intermediates
+ieee_access/data/*.csv
+ieee_access/figures/
+ieee_access/scripts/*.tex
