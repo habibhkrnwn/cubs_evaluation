@@ -31,7 +31,15 @@ RUNS = {
     'aligned_s1': K / 'bcv_v3/results/bcvmamba_a1/bc_vmamba_cubs_lcimt',
     'TransUNet': K / 'bl_v4/results/baselines/transunet',
     'U-Net': K / 'bl_v2/results/baselines/unet',
+    'U-Mamba': K / 'md_bl_v4/results/baselines/umamba',
+    'ResU-Net': K / 'md_bl_v5/results/baselines/resunet',
+    'Attention U-Net': K / 'md_bl_v2/results/baselines/attention_unet',
+    'SegFormer': K / 'md_bl_v3/results/baselines/segformer',
+    'Swin-UNet': K / 'md_bl_v4/results/baselines/swin_unet',
 }
+# Table 2 order (decreasing Dice); BC-VMamba is the region-only seed-42 run.
+ARCH = [('region_s42', 'BC-VMamba'), ('U-Mamba', 'U-Mamba'), ('ResU-Net', 'ResU-Net'), ('Attention U-Net', 'Attention U-Net'),
+        ('TransUNet', 'TransUNet'), ('SegFormer', 'SegFormer'), ('U-Net', 'U-Net'), ('Swin-UNet', 'Swin-UNet')]
 HISTORY = K / 'bc-vmamba-cubs-a1/results/bcvmamba_a1/bc_vmamba_cubs_lcimt/bc_vmamba_cubs_a1_training_history.csv'
 
 out = {}
@@ -91,9 +99,13 @@ r_p = lambda a, b: pearsonr(a, b).statistic
 for k, mae in [('region_s42', 0.1241), ('aligned_s42', 0.1200), ('aligned_s1', 0.1307),
                ('TransUNet', 0.1654), ('U-Net', 0.2528)]:
     assert round(img[k].abs_err.mean(), 4) == mae, (k, img[k].abs_err.mean())
-for k, dice, tail in [('region_s42', 0.8442, 3), ('TransUNet', 0.8257, 9), ('U-Net', 0.8021, 29)]:
-    assert round(img[k].dice.mean(), 4) == dice and int((img[k].abs_err > 0.5).sum()) == tail, k
-for k, diff in [('TransUNet', 0.0413), ('U-Net', 0.1287)]:
+TABLE2 = {'region_s42': (0.8442, 0.1241, 3), 'U-Mamba': (0.8369, 0.1765, 17), 'ResU-Net': (0.8287, 0.1986, 26),
+          'Attention U-Net': (0.8258, 0.1760, 17), 'TransUNet': (0.8257, 0.1654, 9), 'SegFormer': (0.8224, 0.2031, 4),
+          'U-Net': (0.8021, 0.2528, 29), 'Swin-UNet': (0.7956, 0.1673, 6)}
+for k, (dice, mae, tail) in TABLE2.items():
+    assert (round(img[k].dice.mean(), 4), round(img[k].abs_err.mean(), 4), int((img[k].abs_err > 0.5).sum())) == (dice, mae, tail), k
+for k, diff in [('U-Net', 0.1287), ('Attention U-Net', 0.0519), ('ResU-Net', 0.0745), ('Swin-UNet', 0.0432),
+                ('TransUNet', 0.0413), ('SegFormer', 0.0791), ('U-Mamba', 0.0525)]:
     assert round((img[k].abs_err - img['region_s42'].abs_err).mean(), 4) == diff, k
 ov = pd.read_csv(DATA / 'overlap_scatter.csv').set_index('image_id').loc[names]
 assert round(r_p(ov.mean_dice_5ckpt, ov.abs_cimt_err_ensemble_mm), 3) == -0.456
@@ -139,7 +151,7 @@ g.assign(image_id=g.index, signed_px=g.signed / g.px, abs_log2rp=np.abs(g.log2rp
 
 # ---------- B. architectures with archived per-image outputs ----------
 arch = []
-for k, lab in [('region_s42', 'BC-VMamba'), ('TransUNet', 'TransUNet'), ('U-Net', 'U-Net')]:
+for k, lab in ARCH:
     a = img[k]
     arch.append({
         'model': lab, 'dice': float(a.dice.mean()), 'mae': float(a.abs_err.mean()),
@@ -150,18 +162,23 @@ for k, lab in [('region_s42', 'BC-VMamba'), ('TransUNet', 'TransUNet'), ('U-Net'
         'n_gt_0p5': int((a.abs_err > 0.5).sum()), 'n_gt_1p0': int((a.abs_err > 1.0).sum()),
     })
     e = np.sort(a.abs_err.values)
-    pd.DataFrame({'abs_err': e, 'cdf': np.arange(1, len(e) + 1) / len(e)}).round(6).to_csv(DATA / f'ecdf_{lab.replace("-", "").lower()}.csv', index=False)
+    pd.DataFrame({'abs_err': e, 'cdf': np.arange(1, len(e) + 1) / len(e)}).round(6).to_csv(DATA / f'ecdf_{lab.replace("-", "").replace(" ", "").lower()}.csv', index=False)
 out['architectures'] = arch
 pd.DataFrame([{k: (v[0] if isinstance(v, list) else v) for k, v in r.items()} |
               {f'{k}_lo': v[1] for k, v in r.items() if isinstance(v, list)} |
               {f'{k}_hi': v[2] for k, v in r.items() if isinstance(v, list)} for r in arch]).round(6).to_csv(DATA / 'architecture_summary.csv', index=False)
-# Paired per-image comparison: TransUNet vs U-Net differ in Dice rank by 2 but in MAE by a factor ~1.5.
-pa = pd.DataFrame({'image_id': names, 'bc': img['region_s42'].abs_err.values, 'transunet': img['TransUNet'].abs_err.values,
-                   'unet': img['U-Net'].abs_err.values, 'bc_signed': img['region_s42'].signed.values,
-                   'transunet_signed': img['TransUNet'].signed.values, 'unet_signed': img['U-Net'].signed.values})
-pa.round(6).to_csv(DATA / 'architecture_pairs.csv', index=False)
-out['architecture_pair_rho'] = {
-    'bc_transunet': boot(rho, pa.bc, pa.transunet), 'bc_unet': boot(rho, pa.bc, pa.unet), 'transunet_unet': boot(rho, pa.transunet, pa.unet)}
+# Per-image errors across architectures, and architecture-level association of size balance with error.
+E8 = np.stack([img[k].abs_err.values for k, _ in ARCH])
+pair = [spearmanr(E8[i], E8[j]).statistic for i in range(8) for j in range(i + 1, 8)]
+L8 = np.stack([img[k].log2rp.values for k, _ in ARCH])
+S8 = np.stack([img[k].signed.values for k, _ in ARCH])
+out['architecture_level'] = {
+    'pairwise_rho_abs_err_min_max': [float(min(pair)), float(max(pair))],
+    'rho_mean_log2rp_vs_mae': boot(lambda ix: rho(L8[:, ix].mean(1), E8[:, ix].mean(1)), np.arange(401)),
+    'rho_mean_log2rp_vs_mean_signed': boot(lambda ix: rho(L8[:, ix].mean(1), S8[:, ix].mean(1)), np.arange(401)),
+    'rho_median_abs_err_vs_mae': boot(lambda ix: rho(np.median(E8[:, ix], 1), E8[:, ix].mean(1)), np.arange(401)),
+    'rho_p90_abs_err_vs_mae': boot(lambda ix: rho(np.percentile(E8[:, ix], 90, axis=1), E8[:, ix].mean(1)), np.arange(401)),
+}
 
 # ---------- C. discordance and failure anatomy (aligned s42 ensemble, as in Fig. 4) ----------
 q1 = float(ov.mean_dice_5ckpt.quantile(0.25))

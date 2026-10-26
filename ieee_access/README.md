@@ -22,6 +22,10 @@ Per-image derived records are not committed, in line with the repository policy 
    | `bc-vmamba-cubs-a1/results/bcvmamba_a1/bc_vmamba_cubs_lcimt/bc_vmamba_cubs_a1_training_history.csv` | aligned seed-1 training log | |
    | `bl_v2/results/baselines/unet/` | U-Net baseline run | |
    | `bl_v4/results/baselines/transunet/` | TransUNet baseline run | |
+   | `md_bl_v2/results/baselines/attention_unet/` | Attention U-Net baseline run | |
+   | `md_bl_v3/results/baselines/segformer/` | SegFormer baseline run | |
+   | `md_bl_v4/results/baselines/{umamba,swin_unet}/` | U-Mamba and Swin-UNet baseline runs | |
+   | `md_bl_v5/results/baselines/resunet/` | ResU-Net baseline run | |
 
 3. **Reader comparison:** `ieee_access/data/reader_bland_altman.csv`. Build it from `results/R1_observer_matched.csv`, which `analysis/R1_observer_matched.py` writes, by keeping the columns `image_id, release, center, model_mm, msk_A1, msk_A1p, msk_A2, msk_A3` for the fixed test set.
 
@@ -43,7 +47,7 @@ CUBS_SOURCE_PDF=/path/to/source_manuscript.pdf python ieee_access/scripts/build_
 `exploratory.py` asserts the previously reported values before it computes any new estimate:
 
 - Table 2 Dice, MAE and tail counts;
-- Table 3 paired differences;
+- Table 3 paired differences for all seven baselines;
 - r = −0.456;
 - Bland–Altman bias +0.0639 mm;
 - the reader MAEs;

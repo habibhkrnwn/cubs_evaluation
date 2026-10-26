@@ -433,41 +433,48 @@ build('geometry_mechanism',r'''\begin{tikzpicture}[font=\fontsize{8}{10}\selectf
 \end{scope}
 \end{tikzpicture}''')
 
-# Error distributions of the architectures with archived per-image outputs.
+# Error distributions of all eight architectures (per-image outputs reproduce Tables 2-3).
 AR={a['model']:a for a in EXP['architectures']}
-cols={'BC-VMamba':'swgreen','TransUNet':'swblue','U-Net':'sworange'}
-files={'BC-VMamba':'ecdf_bcvmamba.csv','TransUNet':'ecdf_transunet.csv','U-Net':'ecdf_unet.csv'}
-ec=''.join(rf'\addplot[{cols[m]},line width=1.1pt,const plot] table[col sep=comma,x=abs_err,y=cdf] {{../data/{files[m]}}};\addlegendentry{{{m}}}' for m in cols)
+order=[a['model'] for a in EXP['architectures']]
+assert len(order)==8 and order[0]=='BC-VMamba'
+cols={'BC-VMamba':'swgreen','U-Mamba':'swpurple','ResU-Net':'oiverm','Attention U-Net':'oipink','TransUNet':'swblue','SegFormer':'oisky','U-Net':'sworange','Swin-UNet':'black'}
+ec=''.join(rf'\addplot[{cols[m]},line width={"1.6" if m=="BC-VMamba" else "0.8"}pt,const plot] table[col sep=comma,x=abs_err,y=cdf] {{../data/ecdf_{m.replace("-","").replace(" ","").lower()}.csv}};\addlegendentry{{{m}}}' for m in order)
 dots=''
-for k,m in enumerate(cols):
+for k,m in enumerate(order):
  a=AR[m];y=k+1
- for key,mk,off in [('median_abs_err','*',-0.13),('p90_abs_err','square*',0.13)]:
+ for key,mk,off in [('median_abs_err','*',-0.17),('p90_abs_err','square*',0.17)]:
   v,l,h=a[key]
-  dots+=rf'\addplot[{cols[m]},line width=1pt] coordinates {{({l},{y+off}) ({h},{y+off})}};\addplot[only marks,mark={mk},mark size=2pt,{cols[m]}] coordinates {{({v},{y+off})}};'
+  dots+=rf'\addplot[{cols[m]},line width=.9pt] coordinates {{({l},{y+off}) ({h},{y+off})}};\addplot[only marks,mark={mk},mark size=1.8pt,{cols[m]}] coordinates {{({v},{y+off})}};'
+ylab=','.join(f"{{{m} ({AR[m]['mae']:.3f})}}" for m in order)
+off={'BC-VMamba':(0.003,-0.008,'west'),'U-Mamba':(-0.003,0.008,'east'),'ResU-Net':(0.003,0.008,'west'),'Attention U-Net':(0.003,0.007,'west'),
+     'TransUNet':(0.003,-0.008,'west'),'SegFormer':(-0.003,0.008,'east'),'U-Net':(-0.003,0.008,'east'),'Swin-UNet':(0.003,-0.008,'west')}
 sb=''
-for m in cols:
+for m in order:
  a=AR[m];x,xl,xh=a['mean_log2_rp'];y,yl,yh=a['mean_signed_mm']
- sb+=rf'\addplot[{cols[m]},line width=.9pt] coordinates {{({xl},{y}) ({xh},{y})}};\addplot[{cols[m]},line width=.9pt] coordinates {{({x},{yl}) ({x},{yh})}};\addplot[only marks,mark=*,mark size=2.4pt,{cols[m]}] coordinates {{({x},{y})}};'
- sb+=rf'\node[anchor=west,font=\fontsize{{7.5}}{{9}}\selectfont,text={cols[m]}!80!black] at (axis cs:{xh+0.004},{y-0.012}) {{{m}}};'
+ sb+=rf'\addplot[{cols[m]},line width=.6pt,opacity=.6] coordinates {{({xl},{y}) ({xh},{y})}};\addplot[{cols[m]},line width=.6pt,opacity=.6] coordinates {{({x},{yl}) ({x},{yh})}};\addplot[only marks,mark=*,mark size=2.2pt,{cols[m]}] coordinates {{({x},{y})}};'
+ dx,dy,an=off[m]
+ sb+=rf'\node[anchor={an},font=\fontsize{{6.5}}{{8}}\selectfont,text={cols[m]}!85!black,fill=white,fill opacity=.7,text opacity=1,inner sep=.5pt] at (axis cs:{x+dx},{y+dy}) {{{m}}};'
+AL=EXP['architecture_level']
 build('architecture_distributions',r'''\begin{tikzpicture}[font=\fontsize{8}{10}\selectfont]
-\begin{axis}[name=a,width=4.3cm,height=4.0cm,scale only axis,xmin=0,xmax=0.6,ymin=0,ymax=1.02,ymajorgrids,
+\begin{axis}[name=a,width=4.3cm,height=4.4cm,scale only axis,xmin=0,xmax=0.6,ymin=0,ymax=1.02,ymajorgrids,
  xlabel={Absolute CIMT error (mm)},ylabel={Cumulative share of images},xticklabel style={'''+FMT1+r'''},yticklabel style={'''+FMT1+r'''},
- title={Error distribution},legend style={at={(0.97,0.03)},anchor=south east,draw=none,fill=white,fill opacity=.85,text opacity=1,font=\fontsize{7.5}{9}\selectfont},legend cell align=left]
+ title={Error distribution},legend style={at={(0.98,0.02)},anchor=south east,draw=none,fill=white,fill opacity=.85,text opacity=1,font=\fontsize{6.5}{7.5}\selectfont,row sep=-1.5pt},legend cell align=left]
 '''+ec+r'''
 \end{axis}
 '''+lab('(a)','a')+r'''
-\begin{axis}[name=b,at={($(a.east)+(2.15cm,0)$)},anchor=west,width=3.9cm,height=4.0cm,scale only axis,clip=false,xmin=0,xmax=0.47,ymin=0.4,ymax=3.6,y dir=reverse,
- ytick={1,2,3},yticklabels={'''+','.join(f"{{{m}\\\\[-1pt]\\footnotesize MAE {AR[m]['mae']:.3f}}}" for m in cols)+r'''},yticklabel style={align=right},xlabel={Absolute CIMT error (mm)},xticklabel style={'''+FMT1+r'''},title={Typical and upper-tail error}]
+\begin{axis}[name=b,at={($(a.east)+(3.25cm,0)$)},anchor=west,width=3.4cm,height=4.4cm,scale only axis,clip=false,xmin=0,xmax=0.47,ymin=0.4,ymax=8.6,y dir=reverse,
+ ytick={1,...,8},yticklabels={'''+ylab+r'''},yticklabel style={font=\fontsize{7}{8}\selectfont},xlabel={Absolute CIMT error (mm)},xticklabel style={'''+FMT1+r'''},title={Typical and upper-tail error}]
 '''+dots+r'''
 \end{axis}
-'''+lab('(b)','b')+r'''
-\begin{axis}[name=c,at={($(b.east)+(1.75cm,0)$)},anchor=west,width=3.9cm,height=4.0cm,scale only axis,clip=false,xmin=0.12,xmax=0.30,ymin=0,ymax=0.26,ymajorgrids,
+\node[anchor=south east,font=\fontsize{9}{11}\selectfont\bfseries] at ([xshift=-2.6cm,yshift=0.05cm]b.north west) {(b)};
+
+\begin{axis}[name=c,at={($(b.east)+(1.65cm,0)$)},anchor=west,width=4.3cm,height=4.4cm,scale only axis,clip=false,xmin=0.14,xmax=0.29,ymin=0.04,ymax=0.29,ymajorgrids,
  xlabel={Mean $\log_2$(recall / precision)},ylabel={Mean signed CIMT error (mm)},xticklabel style={'''+FMT2+r'''},yticklabel style={'''+FMT2+r'''},title={Over-segmentation and bias}]
 '''+sb+r'''
 \end{axis}
 '''+lab('(c)','c')+r'''
-\begin{scope}[shift={($(b.south west)+(0.1,-1.2)$)},font=\fontsize{7.5}{9}\selectfont]
-\fill[black] (0,0) circle (2pt);\node[right] at (0.1,0) {median};\fill[black] (1.25,-0.07) rectangle (1.39,0.07);\node[right] at (1.42,0) {90th percentile; lines are 95\% cluster-bootstrap CIs};
+\begin{scope}[shift={($(b.south west)+(-1.6,-1.2)$)},font=\fontsize{7.5}{9}\selectfont]
+\fill[black] (0,0) circle (1.8pt);\node[right] at (0.1,0) {median};\fill[black] (1.25,-0.065) rectangle (1.38,0.065);\node[right] at (1.42,0) {90th percentile; MAE in parentheses; lines are 95\% cluster-bootstrap CIs};
 \end{scope}
 \end{tikzpicture}''')
 
