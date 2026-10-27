@@ -1,8 +1,8 @@
 # Endpoint-aligned carotid ultrasound segmentation on CUBS
 
 This repository is the release candidate for the code and split metadata accompanying
-the manuscript *Segmentation Overlap Only Partly Reflects Carotid Intima-Media Thickness
-Measurement Error in Ultrasound Images*.
+the manuscript *Evaluating Segmentation Overlap as a Proxy for Carotid Intima-Media
+Thickness Measurement Error in Ultrasound Images*.
 
 The study evaluates carotid intima-media complex segmentation with both overlap metrics
 and the downstream carotid intima-media thickness (CIMT) error. It contains the proposed
