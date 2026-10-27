@@ -8,12 +8,14 @@ authors:
   - family-names: Kurniawan
     given-names: Habib Hammam
     email: 6022251037@student.its.ac.id
-  - family-names: Sardjono
-    given-names: Tri Arief
-    email: sardjono@bme.its.ac.id
+  - family-names: Farid
+    given-names: Mifta Nur
   - family-names: Kusuma
     given-names: Hendra
     email: hendraks@its.ac.id
+  - family-names: Sardjono
+    given-names: Tri Arief
+    email: sardjono@bme.its.ac.id
 license: MIT
 repository-code: "https://github.com/habibhkrnwn/cubs_evaluation"
 keywords:
